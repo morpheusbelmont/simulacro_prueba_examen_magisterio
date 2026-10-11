@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Simulacro Magisterio 2026 — Nivel Alto</title>
+<style>
+:root{
+  --bg:#0d1117;--panel:#161b22;--panel2:#21262d;--text:#e6edf3;--muted:#8b949e;
+  --accent:#58a6ff;--good:#3fb950;--bad:#f85149;--warn:#d29922;--line:#30363d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#172033 0,#0d1117 45%,#090c10 100%);
+font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);min-height:100vh}
+.container{width:min(1050px,94%);margin:auto;padding:24px 0 50px}
+header{background:linear-gradient(135deg,#182235,#111820);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:18px}
+h1{margin:0 0 8px;font-size:clamp(24px,4vw,38px)}
+h2{margin-top:0}
+.subtitle{color:var(--muted);line-height:1.5}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.badge{border:1px solid #36506e;background:#13243a;color:#b9d8ff;padding:7px 10px;border-radius:999px;font-size:13px}
+#exam{display:none}
+.topbar{position:sticky;top:10px;z-index:10;background:rgba(13,17,23,.92);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:16px}
+.toprow{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.progressWrap{height:10px;background:#0a0e13;border-radius:99px;overflow:hidden;border:1px solid var(--line);margin-top:10px}
+#progress{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#9b8cff);transition:width .25s}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:22px;color:#fff}
+.timer.warning{color:#ffcf66}.timer.danger{color:#ff716b}
+.question{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px}
+.qmeta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:13px}
+.qtag{padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel2)}
+.question h2{font-size:22px;line-height:1.4;margin:8px 0 20px}
+.caution{display:flex;gap:10px;align-items:flex-start;background:#2a2110;border:1px solid #6e5319;color:#ffd98a;padding:11px 13px;border-radius:10px;margin-bottom:18px}
+.caution .icon{font-size:22px}
+.options{display:grid;gap:10px}
+.option{display:flex;gap:11px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:11px;background:#11161d;cursor:pointer;transition:.15s}
+.option:hover{border-color:#50749d;background:#141c25}
+.option input{margin-top:4px;accent-color:var(--accent)}
+.option.selected{border-color:var(--accent);background:#122033}
+.hint{margin-top:16px}
+.hint button,.btn{border:1px solid #38516d;background:#122033;color:#bcdcff;padding:9px 13px;border-radius:9px;cursor:pointer}
+.hintbox{display:none;margin-top:9px;padding:10px 12px;border-left:3px solid var(--warn);background:#201a0c;color:#f4d98e;border-radius:7px}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px}
+#nextBtn{background:#238636;color:white;border:0;padding:13px 22px;border-radius:10px;font-weight:800;cursor:pointer}
+#nextBtn:disabled{opacity:.45;cursor:not-allowed}
+#status{min-height:24px;color:var(--muted)}
+.feedback{display:none;margin-top:16px;padding:12px;border-radius:10px;font-weight:700}
+.feedback.bad{display:block;background:#321417;border:1px solid #7e252b;color:#ffaaa8}
+.feedback.good{display:block;background:#122818;border:1px solid #27652f;color:#9be9a3}
+.matchGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.matchRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}
+.matchRow select,.rankSelect{width:100%;padding:11px;background:#0f141a;color:var(--text);border:1px solid var(--line);border-radius:8px}
+.dragArea{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dragBox{border:1px dashed #53606e;border-radius:12px;padding:12px;min-height:180px;background:#10151b}
+.dragItem{padding:10px;margin:7px 0;border:1px solid #3d4b59;border-radius:8px;background:#18212b;cursor:grab}
+.dropzone{min-height:50px;border:1px dashed #657486;border-radius:8px;padding:8px;margin:7px 0;color:var(--muted)}
+.dropzone.over{border-color:var(--accent);background:#13243a}
+.startCard{text-align:center}
+.startCard ul{display:inline-block;text-align:left;line-height:1.8}
+.warningBig{font-size:42px}
+#report{display:none}
+.scoreHero{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+.stat strong{display:block;font-size:28px;margin-top:5px}
+table{width:100%;border-collapse:collapse;margin-top:14px}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:#bcdcff}
+.goodText{color:#7ee787}.badText{color:#ff7b72}.midText{color:#d2a8ff}
+.errorCard{background:#171d24;border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+.small{font-size:13px;color:var(--muted)}
+.topicBar{height:8px;background:#0a0e13;border-radius:9px;overflow:hidden;margin-top:5px}
+.topicBar i{display:block;height:100%;background:var(--accent)}
+#printBtn{margin-top:15px}
+@media(max-width:700px){.scoreHero{grid-template-columns:1fr 1fr}.matchGrid,.dragArea{grid-template-columns:1fr}.question{padding:17px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>SIMULACRO MAGISTERIO 2026</h1>
+<div class="subtitle">Nivel alto · normativa educativa colombiana · análisis situacional · interpretación pedagógica</div>
+<div class="badges">
+<span class="badge">50 preguntas</span><span class="badge">3 min · preguntas normales</span><span class="badge">5 min · relacionar/arrastrar</span><span class="badge">Tiempo opcional</span>
+<span class="badge">Sin retroceso</span><span class="badge">4 modalidades de respuesta</span><span class="badge">Informe diagnóstico</span>
+</div>
+</header>
+
+<section id="intro" class="question startCard">
+<div class="warningBig">⚠️</div>
+<h2>Antes de comenzar, lee con cuidado</h2>
+<div class="question" style="margin:18px 0;padding:16px;text-align:left">
+  <h3>Configuración del tiempo</h3>
+  <p>Elige cómo quieres realizar el simulacro. En ambas modalidades registraremos cuánto tardas en cada respuesta.</p>
+  <label class="option"><input type="radio" name="timerMode" value="timed" checked> <span><b>Con temporizador</b><br>3 minutos para preguntas normales y 5 minutos para relacionar o arrastrar y soltar.</span></label>
+  <label class="option"><input type="radio" name="timerMode" value="untimed"> <span><b>Sin límite de tiempo</b><br>Responde a tu ritmo; el sistema medirá el tiempo real de cada pregunta y el total.</span></label>
+</div>
+<p>Este simulacro está diseñado para aproximarse a una prueba de alta exigencia para el concurso docente. No busca premiar la memorización aislada: varias preguntas exigen distinguir competencias, responsabilidades institucionales, principios normativos y decisiones pedagógicas.</p>
+<ul>
+<li><b>Tiempo con temporizador:</b> 3 minutos para preguntas normales; 5 minutos para relacionar y arrastrar y soltar.</li>
+<li><b>Tiempo opcional:</b> puedes elegir la modalidad sin límite. En ambos casos se registra el tiempo empleado por respuesta y el total.</li>
+<li><b>Tiempo por pregunta:</b> 2 minutos para selección única/múltiple; 3 minutos para unir conceptos y arrastrar y relacionar.</li>
+<li>No podrás avanzar ni retroceder voluntariamente sin responder.</li>
+<li>Si se agota el minuto, la pregunta se registra como incorrecta y el sistema continúa.</li>
+<li>Las pistas orientan el análisis, pero no revelan la respuesta.</li>
+<li>Los errores quedarán registrados para el informe final.</li>
+<li>Hay selección única, selección múltiple, relación y arrastre/ordenamiento.</li>
+</ul>
+<p class="small">Consejo: identifica primero la norma, el sujeto responsable y la finalidad de la actuación. Después elimina las opciones que confundan conceptos próximos.</p>
+<button class="btn" onclick="startExam()">INICIAR SIMULACRO</button>
+</section>
+
+<section id="exam">
+<div class="topbar">
+<div class="toprow"><div><b id="counter">Pregunta 1 de 50</b><div class="small" id="typeLabel"></div></div><div class="timer" id="timer">01:00</div></div>
+<div class="progressWrap"><div id="progress"></div></div>
+</div>
+<div id="questionArea"></div>
+</section>
+
+<section id="report" class="question">
+<h2>📊 Informe diagnóstico del simulacro</h2>
+<div id="summary"></div>
+<div class="scoreHero">
+<div class="stat">Puntaje<strong id="score"></strong></div>
+<div class="stat">Aciertos<strong id="correct"></strong></div>
+<div class="stat">Errores<strong id="wrong"></strong></div>
+<div class="stat">Tiempo<strong id="totalTime"></strong></div>
+</div>
+<h3>Rendimiento por área</h3><div id="topics"></div>
+<h3>Errores que debes revisar</h3><div id="errors"></div>
+<h3>Tiempo por pregunta</h3><div id="times"></div>
+<button class="btn" id="printBtn" onclick="window.print()">🖨️ Imprimir / guardar informe PDF</button>
+</section>
+<footer style="margin-top:22px;padding:18px;text-align:center;border:1px solid var(--line);border-radius:14px;background:rgba(22,27,34,.75)">
+  <div class="small">DISEÑO Y DESARROLLO EDUCATIVO</div>
+  <strong>Lic. Carlos Eduardo Sepúlveda Toro</strong>
+  <div class="small">Licenciado en Comunicación e Informática Educativa · Diseñador Gráfico · Especialista en Edumática · Desarrollador Multimedia</div>
+</footer>
+</div>
+
+<script>
+const questions = [
+/* 1-10 */
+{topic:"Constitución",type:"single",q:"Una institución educativa niega la participación de un estudiante en una actividad por su origen familiar. Desde la perspectiva constitucional, ¿qué criterio debe orientar primordialmente la decisión institucional?",o:["Aplicar un trato uniforme aunque produzca exclusión","Garantizar igualdad y dignidad, evitando discriminaciones injustificadas","Delegar el asunto exclusivamente al director de grupo","Priorizar la tradición institucional sobre los derechos fundamentales"],a:1,h:"Busca el principio que limita tratos diferenciados sin justificación constitucional."},
+{topic:"Constitución",type:"single",q:"La concepción de la educación como derecho y servicio público con función social implica que la acción educativa debe articularse especialmente con:",o:["La formación exclusivamente laboral","El acceso al conocimiento, la ciencia, la técnica y demás bienes y valores de la cultura","La selección temprana de estudiantes según rendimiento","La autonomía absoluta de cada establecimiento frente al Estado"],a:1,h:"Relaciona el artículo constitucional sobre educación con sus finalidades."},
+{topic:"Constitución",type:"multiple",q:"En el marco constitucional, selecciona los elementos que se relacionan directamente con los fines sociales de la educación:",o:["Acceso al conocimiento y a la cultura","Formación en derechos humanos y democracia","Eliminación de toda autonomía escolar","Protección del ambiente","Imposición de una única concepción cultural"],a:[0,1,3],h:"No confundas pluralismo y formación integral con homogeneización."},
+{topic:"Constitución",type:"single",q:"Un docente sostiene que la dignidad humana solo opera frente a actuaciones estatales y no dentro de la relación pedagógica. ¿Cuál valoración es más adecuada?",o:["Correcta, porque el aula no tiene dimensión jurídica","Incorrecta, porque la dignidad fundamenta la profesión docente y orienta el trato a las personas","Correcta, salvo que exista una sanción disciplinaria","Incorrecta solo en instituciones oficiales"],a:1,h:"Examina el vínculo entre dignidad, derechos fundamentales y ejercicio docente."},
+{topic:"Constitución",type:"single",q:"La participación en el gobierno escolar constituye principalmente una expresión de:",o:["Centralización administrativa","Participación democrática de la comunidad educativa","Privatización del servicio educativo","Evaluación externa del establecimiento"],a:1,h:"Distingue participación de administración financiera."},
+{topic:"Ley 115",type:"single",q:"Una institución pretende formular su PEI sin considerar las características sociales, culturales y económicas de su comunidad. ¿Qué principio resulta directamente comprometido?",o:["Pertinencia del proyecto educativo frente al contexto","Exclusivamente la autonomía presupuestal","La evaluación externa nacional","La carrera administrativa"],a:0,h:"El PEI no se diseña aislado del contexto de la comunidad educativa."},
+{topic:"Ley 115",type:"multiple",q:"Según la lógica de la Ley 115, selecciona componentes que corresponden al gobierno escolar o a la participación de la comunidad educativa:",o:["Consejo Directivo","Consejo Académico","Consejo de Estado como órgano escolar","Representación de la comunidad educativa","Ministerio de Educación como órgano interno de cada colegio"],a:[0,1,3],h:"Piensa en los órganos propios del establecimiento educativo."},
+{topic:"Ley 115",type:"single",q:"Una decisión institucional pretende modificar aspectos esenciales del PEI sin participación de la comunidad educativa. ¿Cuál es la principal objeción?",o:["Toda modificación está prohibida","Se desconoce el carácter participativo y la construcción institucional del PEI","Solo el rector puede modificarlo sin límites","El PEI depende exclusivamente de una prueba nacional"],a:1,h:"La pregunta evalúa participación y autonomía escolar, no una prohibición absoluta."},
+{topic:"Ley 115",type:"single",q:"En educación formal, la evaluación debe entenderse dentro del proceso formativo y no solamente como:",o:["Una herramienta para retroalimentar","Una medición aislada para clasificar estudiantes","Un insumo para mejorar la enseñanza","Una fuente de información para decisiones pedagógicas"],a:1,h:"La trampa está en convertir la evaluación en simple clasificación."},
+{topic:"Ley 115",type:"single",q:"Un establecimiento diseña su currículo ignorando los fines y objetivos generales de la educación. ¿Cuál es la mejor interpretación?",o:["El currículo puede apartarse totalmente de ellos","El currículo debe desarrollarse en coherencia con los fines y objetivos educativos","Solo las instituciones privadas deben observarlos","Los fines son recomendaciones sin relación curricular"],a:1,h:"Relaciona currículo, fines de la educación y autonomía escolar."},
+
+/* 11-20 */
+{topic:"Ley 715",type:"single",q:"En el esquema de competencias territoriales, una entidad territorial certificada debe actuar principalmente dentro de las funciones que la ley le asigna. Esto refleja:",o:["Descentralización con distribución legal de competencias","Ausencia total de coordinación nacional","Privatización de la educación","Supremacía de la autonomía escolar sobre cualquier norma"],a:0,h:"La palabra clave es distribución de competencias, no independencia absoluta."},
+{topic:"Ley 715",type:"multiple",q:"En el marco de la Ley 715, identifica actuaciones compatibles con la gestión territorial del servicio educativo:",o:["Administrar el servicio educativo en su jurisdicción conforme a la ley","Distribuir recursos según las reglas aplicables","Desconocer lineamientos nacionales por autonomía territorial","Organizar la prestación del servicio dentro de las competencias asignadas","Sustituir las funciones de todos los establecimientos educativos"],a:[0,1,3],h:"La descentralización distribuye responsabilidades; no elimina la coordinación normativa."},
+{topic:"Ley 715",type:"single",q:"Si una secretaría de educación certificada pretende trasladar al establecimiento educativo una competencia que la ley asigna expresamente a la entidad territorial, el problema principal es:",o:["De preferencia pedagógica","De distribución legal de competencias","De libertad de cátedra","De evaluación de estudiantes"],a:1,h:"Identifica primero quién es el sujeto competente."},
+{topic:"Ley 715",type:"single",q:"¿Qué relación es conceptualmente más adecuada entre recursos del sector educativo y calidad?",o:["El recurso garantiza automáticamente calidad","La gestión de recursos debe orientarse al cumplimiento de fines del servicio y a las responsabilidades asignadas","Los recursos son independientes de la planeación","Solo el docente determina el destino de los recursos públicos"],a:1,h:"Evita el razonamiento causal simplista: recurso no equivale automáticamente a calidad."},
+{topic:"Ley 715",type:"single",q:"Un municipio no certificado decide asumir directamente todas las competencias que la ley reserva a la entidad territorial certificada. ¿Cuál sería el enfoque correcto?",o:["Puede hacerlo por simple decisión del alcalde","Debe respetar la distribución legal de competencias y el régimen de certificación","Siempre puede hacerlo si tiene presupuesto","Puede hacerlo si lo aprueba el consejo de padres"],a:1,h:"La certificación es jurídicamente relevante para la distribución de competencias."},
+{topic:"Decreto 1278",type:"single",q:"El Estatuto de Profesionalización Docente tiene como eje la regulación de:",o:["Únicamente los salarios docentes","Ingreso, permanencia, ascenso y retiro, entre otros aspectos de la carrera docente","Exclusivamente el currículo escolar","La financiación de las universidades"],a:1,h:"Busca los cuatro momentos clásicos de la carrera docente."},
+{topic:"Decreto 1278",type:"multiple",q:"Selecciona elementos que el Decreto 1278 reconoce como atributos relevantes para la profesionalización docente:",o:["Formación","Experiencia","Desempeño","Competencias","Antigüedad como único criterio"],a:[0,1,2,3],h:"La norma no reduce la idoneidad a un solo factor."},
+{topic:"Decreto 1278",type:"single",q:"La profesión docente, según el Estatuto de Profesionalización, se fundamenta en el reconocimiento de:",o:["La dignidad de todo ser humano y sus derechos fundamentales","La autoridad jerárquica como valor superior","La antigüedad como principio único","La obediencia institucional sin autonomía"],a:0,h:"La respuesta está vinculada con los principios y valores del quehacer docente."},
+{topic:"Decreto 1278",type:"single",q:"Un docente afirma que la capacitación y actualización profesional son asuntos personales sin relación con la calidad educativa. ¿Cuál valoración corresponde?",o:["Es correcta","Es incorrecta: la formación y actualización deben contribuir al mejoramiento de la calidad y al desarrollo profesional","Es correcta únicamente para docentes provisionales","Solo aplica a directivos docentes"],a:1,h:"Relaciona desarrollo profesional con calidad de la educación."},
+{topic:"Decreto 1278",type:"single",q:"Una evaluación del desempeño docente se interpreta mejor como un mecanismo relacionado con:",o:["El reconocimiento y seguimiento del desempeño profesional dentro del régimen aplicable","La sustitución automática del concurso de ingreso","La evaluación exclusiva de los estudiantes","La eliminación de la autonomía pedagógica"],a:0,h:"No confundas evaluación del desempeño con evaluación de estudiantes o concurso de ingreso."},
+
+/* 21-30 */
+{topic:"Ley 1098",type:"single",q:"En una decisión escolar que involucra a un niño o adolescente, el criterio de interés superior exige:",o:["Priorizar automáticamente la opinión del adulto","Buscar la garantía efectiva de sus derechos y su desarrollo integral, considerando las circunstancias del caso","Aplicar la misma medida sin analizar el contexto","Delegar siempre la decisión al estudiante"],a:1,h:"El interés superior exige análisis de derechos y circunstancias concretas."},
+{topic:"Ley 1098",type:"multiple",q:"Ante una posible vulneración de derechos de un estudiante, son enfoques compatibles con la protección integral:",o:["Prevención de vulneraciones","Restablecimiento de derechos cuando corresponda","Actuación articulada de las autoridades competentes","Silenciar el caso para proteger la imagen institucional","Responsabilizar al niño por la actuación adulta"],a:[0,1,2],h:"Protección integral implica prevenir, garantizar y restablecer derechos."},
+{topic:"Ley 1098",type:"single",q:"El derecho a la educación de niños, niñas y adolescentes debe analizarse bajo una perspectiva que prioriza:",o:["Exclusión por bajo rendimiento","Garantía del derecho, permanencia y desarrollo integral","Selección económica de beneficiarios","Sanción como primera respuesta"],a:1,h:"No reduzcas el derecho a la simple matrícula."},
+{topic:"Ley 1098",type:"single",q:"Un docente conoce una situación que puede constituir vulneración de derechos de un menor. La respuesta institucional más adecuada es:",o:["Ignorarla para evitar problemas","Activar las rutas y mecanismos de protección correspondientes, según la situación","Publicarla en redes para conseguir apoyo","Resolverla exclusivamente con una sanción al estudiante"],a:1,h:"La clave es protección y activación institucional, no exposición pública."},
+{topic:"Ley 1620",type:"single",q:"El Sistema Nacional de Convivencia Escolar busca articular acciones especialmente relacionadas con:",o:["Convivencia, formación para derechos humanos, educación para la sexualidad y prevención de violencia escolar","Solo disciplina y castigo","Únicamente rendimiento académico","Exclusivamente infraestructura"],a:0,h:"Recuerda el objeto amplio del sistema de convivencia."},
+{topic:"Ley 1620",type:"multiple",q:"Selecciona elementos coherentes con una estrategia institucional de convivencia escolar:",o:["Prevención de violencias","Promoción de derechos humanos","Atención y seguimiento de situaciones","Estigmatización del estudiante involucrado","Participación de la comunidad educativa"],a:[0,1,2,4],h:"Una ruta de convivencia combina promoción, prevención, atención y seguimiento."},
+{topic:"Ley 1620",type:"single",q:"Si una institución responde a un conflicto escolar únicamente expulsando al estudiante sin activar la ruta correspondiente, el principal problema es:",o:["La falta de uso de tecnología","La ausencia de un enfoque integral de promoción, prevención, atención y seguimiento","Que toda expulsión esté prohibida","Que los estudiantes no puedan recibir sanciones"],a:1,h:"La existencia de una sanción no sustituye la ruta integral."},
+{topic:"Ley 1620",type:"single",q:"El Comité Escolar de Convivencia debe comprenderse principalmente como un espacio de:",o:["Coordinación y articulación para la convivencia escolar","Evaluación exclusiva de docentes","Administración de recursos de matrícula","Selección de estudiantes"],a:0,h:"No confundas un comité de convivencia con un órgano de contratación o evaluación."},
+{topic:"Ley 1290",type:"single",q:"El propósito de identificar ritmos de desarrollo, intereses y características personales dentro de la evaluación institucional es:",o:["Clasificar permanentemente a los estudiantes","Valorar avances y orientar el proceso educativo","Eliminar la evaluación cualitativa","Sustituir el currículo"],a:1,h:"La evaluación institucional tiene una función formativa y de toma de decisiones."},
+{topic:"Ley 1290",type:"multiple",q:"El SIEE debe contemplar, entre otros elementos:",o:["Criterios de evaluación y promoción","Escala institucional y su equivalencia nacional","Estrategias de valoración integral","Acciones de seguimiento para mejorar desempeños","Una única calificación nacional obligatoria para todos los colegios"],a:[0,1,2,3],h:"El sistema institucional tiene componentes definidos y margen para su construcción escolar."},
+
+/* 31-40 */
+{topic:"Ley 1290",type:"single",q:"La escala nacional de valoración se relaciona con las categorías:",o:["Excelente, bueno, regular, malo","Superior, alto, básico, bajo","Aprobado, reprobado, pendiente, retirado","A, B, C, D"],a:1,h:"Recuerda las cuatro categorías nacionales del sistema de evaluación."},
+{topic:"Ley 1290",type:"single",q:"Una institución crea criterios de promoción, pero nunca los incorpora en su sistema institucional de evaluación. ¿Qué falla?",o:["El SIEE debe contener criterios de evaluación y promoción","No existe ninguna obligación sobre promoción","Solo el ICFES puede establecer criterios escolares","Los criterios de promoción son exclusivamente familiares"],a:0,h:"Ubica los criterios de promoción dentro de los componentes del SIEE."},
+{topic:"Ley 1290",type:"single",q:"La promoción anticipada, dentro del marco del Decreto 1290, debe entenderse como:",o:["Un ascenso automático por solicitud de cualquier estudiante","Un procedimiento sujeto a los criterios y condiciones definidos en el sistema institucional","Una decisión exclusiva del docente de la asignatura","Una prueba nacional administrada por el ICFES"],a:1,h:"La institución establece criterios dentro del marco normativo."},
+{topic:"Decreto 1075",type:"single",q:"El Decreto 1075 de 2015 se caracteriza principalmente por:",o:["Crear un currículo único obligatorio para cada aula","Compilar la normativa reglamentaria vigente del sector educativo en un decreto único","Eliminar la autonomía escolar","Regular únicamente la carrera docente"],a:1,h:"Su naturaleza es reglamentaria y compilatoria del sector."},
+{topic:"Decreto 1075",type:"multiple",q:"En el marco del Decreto 1075, identifica afirmaciones compatibles con su función:",o:["Integra normativa reglamentaria del sector educativo","Tiene ámbito de aplicación nacional en las materias reguladas","Permite consultar disposiciones organizadas dentro de una estructura única","Deroga automáticamente todas las leyes educativas","Sustituye la Constitución Política"],a:[0,1,2],h:"Un decreto reglamentario no puede sustituir la Constitución ni convertir leyes en inexistentes."},
+{topic:"Decreto 1421",type:"single",q:"En educación inclusiva, los ajustes razonables buscan principalmente:",o:["Separar permanentemente al estudiante con discapacidad","Eliminar o reducir barreras y permitir el acceso, participación y aprendizaje en condiciones de equidad","Aplicar exactamente la misma estrategia a todos","Reducir expectativas sin analizar necesidades"],a:1,h:"La inclusión se centra en barreras, apoyos y participación."},
+{topic:"Decreto 1421",type:"multiple",q:"Son principios asociados a la atención educativa de personas con discapacidad en el marco del Decreto 1421:",o:["Calidad","Diversidad","Pertinencia","Participación","Exclusión preventiva"],a:[0,1,2,3],h:"Los principios buscan garantizar una educación inclusiva y pertinente."},
+{topic:"Decreto 1421",type:"single",q:"Un docente decide que un estudiante con discapacidad debe trabajar siempre fuera del aula porque 'es más fácil para todos'. ¿Cuál es la mejor valoración?",o:["Es una medida inclusiva por definición","Debe analizarse como posible barrera y contrastarse con ajustes razonables, participación y educación inclusiva","Es obligatoria en todos los casos","La decisión depende únicamente del grupo de estudiantes"],a:1,h:"La segregación automática contradice el enfoque de eliminación de barreras."},
+{topic:"Decreto 1421",type:"single",q:"El Diseño Universal para el Aprendizaje, dentro del enfoque de educación inclusiva, se orienta a:",o:["Diseñar experiencias flexibles desde el inicio para atender diversidad, sin excluir apoyos particulares cuando sean necesarios","Eliminar todos los apoyos individuales","Usar una sola metodología","Separar la evaluación del proceso pedagógico"],a:0,h:"DUA y ajustes razonables no son conceptos equivalentes ni excluyentes."},
+{topic:"Pedagogía",type:"single",q:"Un docente detecta que la mayoría de estudiantes falla en una competencia específica. La decisión pedagógica más sólida es:",o:["Mantener exactamente la misma estrategia hasta terminar el periodo","Usar la evidencia de evaluación para ajustar la enseñanza y ofrecer estrategias de apoyo","Bajar automáticamente los criterios","Aumentar tareas sin diagnóstico"],a:1,h:"La evaluación debe producir decisiones pedagógicas, no solo calificaciones."},
+
+/* 41-45 matching */
+{topic:"Integración normativa",type:"match",q:"Relaciona cada norma con su núcleo temático predominante.",pairs:[
+["Ley 715 de 2001","A. Distribución de competencias y recursos del sector"],
+["Decreto 1278 de 2002","B. Profesionalización docente"],
+["Ley 1620 de 2013","C. Convivencia escolar"],
+["Decreto 1421 de 2017","D. Educación inclusiva y discapacidad"]],a:["A","B","C","D"],h:"No memorices solo números: asocia cada norma con su objeto."},
+{topic:"Integración normativa",type:"match",q:"Relaciona el instrumento con el concepto que mejor lo caracteriza.",pairs:[
+["Decreto 1290 de 2009","A. Evaluación y promoción de estudiantes"],
+["Decreto 1075 de 2015","B. Decreto Único Reglamentario del Sector Educación"],
+["Ley 1098 de 2006","C. Código de Infancia y Adolescencia"],
+["Ley 115 de 1994","D. Ley General de Educación"]],a:["A","B","C","D"],h:"Identifica primero el nivel: ley general, código o decreto reglamentario."},
+{topic:"Responsabilidades",type:"match",q:"Relaciona el actor con la actuación que mejor corresponde a su ámbito.",pairs:[
+["Ministerio de Educación Nacional","A. Orientación y lineamientos nacionales"],
+["Entidad territorial certificada","B. Gestión territorial del servicio según competencias"],
+["Establecimiento educativo","C. Gestión escolar y desarrollo del PEI/SIEE"],
+["Docente","D. Desarrollo pedagógico y funciones propias del cargo"]],a:["A","B","C","D"],h:"La clave es distinguir rectoría nacional, gestión territorial, gestión escolar y función pedagógica."},
+{topic:"Evaluación",type:"match",q:"Relaciona el concepto con su función.",pairs:[
+["Evaluación institucional","A. Valorar permanentemente el desempeño y orientar decisiones"],
+["SIEE","B. Sistema institucional con criterios, escalas y estrategias"],
+["Promoción","C. Determinación del paso del estudiante según criterios"],
+["Retroalimentación","D. Información útil para mejorar el aprendizaje"]],a:["A","B","C","D"],h:"Distingue proceso, sistema, decisión y uso de información."},
+{topic:"Convivencia",type:"match",q:"Relaciona la acción con el momento de la gestión de convivencia.",pairs:[
+["Promoción","A. Fortalecer capacidades y cultura de derechos"],
+["Prevención","B. Reducir factores de riesgo y evitar situaciones"],
+["Atención","C. Actuar frente a una situación presentada"],
+["Seguimiento","D. Verificar evolución y cumplimiento de acciones"]],a:["A","B","C","D"],h:"Piensa en la secuencia temporal de la ruta."},
+
+/* 46-50 drag/order */
+{topic:"Procedimiento",type:"drag",q:"Relaciona cada acción con el paso que le corresponde en el ciclo de mejora pedagógica.",items:["Analizar evidencias de aprendizaje","Ajustar la estrategia pedagógica","Implementar apoyo","Volver a valorar resultados"],targets:["Diagnóstico de la dificultad","Respuesta pedagógica","Intervención de apoyo","Comprobación de avances"],a:["Diagnóstico de la dificultad","Respuesta pedagógica","Intervención de apoyo","Comprobación de avances"],h:"Relaciona cada acción con su función: comprender, planear, intervenir y comprobar."},
+{topic:"Convivencia",type:"drag",q:"Relaciona cada actuación con la fase de la ruta de convivencia que mejor la describe.",items:["Identificar y valorar la situación","Activar la atención correspondiente","Implementar medidas y acciones","Hacer seguimiento"],targets:["Valoración inicial","Atención del caso","Aplicación de medidas","Verificación posterior"],a:["Valoración inicial","Atención del caso","Aplicación de medidas","Verificación posterior"],h:"Distingue la valoración inicial, la respuesta al caso, las medidas y la verificación posterior."},
+{topic:"Inclusión",type:"drag",q:"Relaciona cada actuación al propósito correspondiente en una respuesta educativa inclusiva.",items:["Identificar la barrera","Analizar necesidades y contexto","Diseñar/aplicar ajustes o apoyos","Evaluar su efectividad"],targets:["Reconocer el obstáculo","Comprender la situación del estudiante","Facilitar acceso, participación y aprendizaje","Comprobar si disminuyó la barrera"],a:["Reconocer el obstáculo","Comprender la situación del estudiante","Facilitar acceso, participación y aprendizaje","Comprobar si disminuyó la barrera"],h:"Cada acción cumple una función distinta: detectar, comprender, responder y verificar."},
+{topic:"Evaluación",type:"drag",q:"Relaciona cada práctica con su función dentro de la evaluación formativa.",items:["Recoger evidencias","Interpretar resultados","Retroalimentar","Reorientar la enseñanza"],targets:["Obtener información del aprendizaje","Identificar avances y dificultades","Ofrecer información útil para mejorar","Ajustar las decisiones pedagógicas"],a:["Obtener información del aprendizaje","Identificar avances y dificultades","Ofrecer información útil para mejorar","Ajustar las decisiones pedagógicas"],h:"La evaluación formativa transforma evidencias en decisiones que ayudan a aprender."},
+{topic:"Gestión educativa",type:"drag",q:"Relaciona cada nivel de decisión con su descripción.",items:["Marco normativo","Orientación institucional","Planeación pedagógica","Aplicación en el aula"],targets:["Reglas y obligaciones aplicables","Acuerdos y prioridades del establecimiento","Organización de objetivos, estrategias y evaluación","Desarrollo concreto de la experiencia de aprendizaje"],a:["Reglas y obligaciones aplicables","Acuerdos y prioridades del establecimiento","Organización de objetivos, estrategias y evaluación","Desarrollo concreto de la experiencia de aprendizaje"],h:"Distingue la norma, la orientación del colegio, la planeación y la práctica concreta."}
+];
+
+let idx=0, totalSeconds=0, qStart=0, timer=null, answered=false, results=[], timerMode="timed", elapsedTicker=null;
+let dragState=null;
+
+function startExam(){
+  timerMode=document.querySelector('input[name="timerMode"]:checked')?.value || "timed";
+  document.getElementById("intro").style.display="none";
+  document.getElementById("exam").style.display="block";
+  showQuestion();
+}
+function showQuestion(){
+  clearInterval(timer); clearInterval(elapsedTicker); answered=false; qStart=Date.now();
+  const q=questions[idx];
+  document.getElementById("counter").textContent=`Pregunta ${idx+1} de ${questions.length}`;
+  document.getElementById("typeLabel").textContent=typeName(q.type)+" · Área: "+q.topic;
+  document.getElementById("progress").style.width=((idx)/questions.length*100)+"%";
+  let body=`<div class="question"><div class="qmeta"><span class="qtag">Nivel alto</span><span class="qtag">${q.topic}</span><span class="qtag">${typeName(q.type)}</span></div>
+  <h2>${q.q}</h2><div class="caution"><span class="icon">⚠️</span><div><b>ATENCIÓN:</b> analiza con cuidado. Una palabra puede cambiar el sentido jurídico o pedagógico de la situación.</div></div>`;
+  if(q.type==="single"||q.type==="multiple"){
+    body+=`<div class="options">`;
+    q.o.forEach((x,i)=>body+=`<label class="option"><input type="${q.type==='single'?'radio':'checkbox'}" name="ans" value="${i}" onchange="enableNext()"><span><b>${String.fromCharCode(65+i)}.</b> ${x}</span></label>`);
+    body+=`</div>`;
+  } else if(q.type==="match"){
+    body+=`<div class="matchGrid"><div class="dragBox"><b>Columna 1 · Conceptos</b>`;
+    q.pairs.forEach((p,i)=>body+=`<div class="dragItem" style="cursor:default">${i+1}. ${p[0]}</div>`);
+    body+=`</div><div class="dragBox"><b>Columna 2 · Opciones para relacionar</b>`;
+    q.pairs.forEach(p=>body+=`<div class="dragItem" style="cursor:default"><b>${p[1].split(".")[0]}.</b> ${p[1].slice(3)}</div>`);
+    body+=`</div></div><h3>Selecciona la correspondencia de cada concepto</h3><div class="options">`;
+    q.pairs.forEach((p,i)=>body+=`<div class="matchRow"><div><b>${i+1}.</b> ${p[0]}</div><select id="m${i}" onchange="enableNext()"><option value="">Selecciona…</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>`);
+    body+=`</div>`;
+  } else if(q.type==="drag"){
+    body+=`<p class="small">Arrastra cada tarjeta de la izquierda hasta la descripción que le corresponde a la derecha.</p><div class="dragArea"><div class="dragBox" id="dragSource"><b>Acciones / conceptos</b>`;
+    q.items.forEach((x,i)=>body+=`<div class="dragItem" draggable="true" data-value="${x}" id="drag${i}">${x}</div>`);
+    body+=`</div><div class="dragBox" id="dropTarget"><b>Descripciones / correspondencias</b>`;
+    q.targets.forEach((x,i)=>body+=`<div class="dropzone" data-slot="${i}" data-target="${x}"><b>${x}</b><div class="small">Suelta aquí la acción correspondiente</div></div>`);
+    body+=`</div></div>`;
+  }
+  body+=`<div class="hint"><button onclick="toggleHint()">💡 Ver pista</button><div id="hintbox" class="hintbox">${q.h}</div></div>
+  <div id="feedback" class="feedback"></div><div class="actions"><span id="status">Selecciona una respuesta.</span><button id="nextBtn" disabled onclick="handleNext()">RESPONDER Y CONTINUAR →</button></div></div>`;
+  document.getElementById("questionArea").innerHTML=body;
+  if(q.type==="drag") initDrag();
+  startTimer();
+}
+function typeName(t){return t==="single"?"Selección única":t==="multiple"?"Selección múltiple":t==="match"?"Unir conceptos": "Arrastrar y ordenar";}
+function toggleHint(){document.getElementById("hintbox").style.display="block"}
+function enableNext(){
+  if(answered)return;
+  let ok=false,q=questions[idx];
+  if(q.type==="single")ok=document.querySelector('input[name="ans"]:checked')!==null;
+  if(q.type==="multiple")ok=document.querySelectorAll('input[name="ans"]:checked').length>0;
+  if(q.type==="match")ok=[0,1,2,3].every(i=>document.getElementById("m"+i).value);
+  if(q.type==="drag")ok=[...document.querySelectorAll("#dropTarget .dropzone")].every(z=>z.querySelector(".dragItem"));
+  document.getElementById("nextBtn").disabled=!ok;
+  document.getElementById("status").textContent=ok?"Respuesta lista.": "Selecciona/organiza una respuesta.";
+}
+function initDrag(){
+  document.querySelectorAll(".dragItem").forEach(el=>{
+    el.addEventListener("dragstart",e=>{dragState=el;e.dataTransfer.setData("text/plain",el.id)});
+  });
+  document.querySelectorAll(".dropzone").forEach(z=>{
+    z.addEventListener("dragover",e=>{e.preventDefault();z.classList.add("over")});
+    z.addEventListener("dragleave",()=>z.classList.remove("over"));
+    z.addEventListener("drop",e=>{
+      e.preventDefault();z.classList.remove("over");
+      const existing=z.querySelector(".dragItem");
+      if(existing) document.getElementById("dragSource").appendChild(existing);
+      const hint=z.querySelector(".small"); if(hint) hint.remove();
+      z.appendChild(dragState); enableNext();
+    });
+  });
+}
+function startTimer(){
+  clearInterval(timer); clearInterval(elapsedTicker);
+  const q=questions[idx];
+  const limit=(q.type==="match"||q.type==="drag")?300:180;
+  const el=document.getElementById("timer");
+  if(timerMode==="untimed"){
+    el.textContent="SIN LÍMITE";
+    el.className="timer";
+    timer=null;
+    elapsedTicker=setInterval(()=>{
+      const seconds=Math.floor((Date.now()-qStart)/1000);
+      el.textContent=`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
+    },250);
+    return;
+  }
+  let left=limit;
+  const paint=()=>{el.textContent=`${String(Math.floor(left/60)).padStart(2,"0")}:${String(left%60).padStart(2,"0")}`;};
+  paint();
+  timer=setInterval(()=>{
+    left--;
+    paint();
+    el.className="timer"+(left<=10?" danger":left<=30?" warning":"");
+    if(left<=0){clearInterval(timer);timeoutQuestion();}
+  },1000);
+}
+function getAnswer(){
+  const q=questions[idx];
+  if(q.type==="single") return [...document.querySelectorAll('input[name="ans"]:checked')].map(x=>+x.value);
+  if(q.type==="multiple") return [...document.querySelectorAll('input[name="ans"]:checked')].map(x=>+x.value).sort();
+  if(q.type==="match") return [0,1,2,3].map(i=>document.getElementById("m"+i).value);
+  return [...document.querySelectorAll("#dropTarget .dropzone")].map(z=>({target:z.dataset.target,item:z.querySelector(".dragItem")?.dataset.value||""}));
+}
+function equal(a,b){return JSON.stringify(a)===JSON.stringify(b)}
+function submitAnswer(timeout=false){
+  if(answered)return; answered=true; clearInterval(timer); clearInterval(elapsedTicker);
+  const q=questions[idx], ans=getAnswer();
+  const expected=q.type==="drag"?q.targets.map((target,i)=>({target,item:q.items[i]})):q.a;
+  const correct=equal(ans,expected);
+  const elapsed=Math.max(0,Math.round((Date.now()-qStart)/1000));
+  results.push({n:idx+1,topic:q.topic,correct,elapsed,answer:ans,expected:expected,question:q.q,timeout});
+  const fb=document.getElementById("feedback");
+  fb.className="feedback "+(correct?"good":"bad");
+  fb.style.display="block";
+  fb.innerHTML=correct?"✓ Respuesta registrada correctamente.":`⚠️ ${timeout?"Tiempo agotado. ":""}Respuesta registrada como incorrecta. La solución se reservará para el informe final.`;
+  document.getElementById("nextBtn").disabled=false;
+  document.getElementById("nextBtn").textContent=idx===questions.length-1?"FINALIZAR SIMULACRO →":"CONTINUAR →";
+  document.getElementById("status").textContent="Respuesta cerrada.";
+  document.querySelectorAll("input,select").forEach(x=>x.disabled=true);
+  document.querySelectorAll(".dragItem").forEach(x=>x.draggable=false);
+  if(timeout)setTimeout(()=>goNext(),700);
+}
+function timeoutQuestion(){submitAnswer(true)}
+function handleNext(){ if(!answered) submitAnswer(false); else goNext(); }
+function goNext(){
+  if(idx<questions.length-1){idx++;showQuestion()}else{finish()}
+}
+function finish(){
+  clearInterval(timer); document.getElementById("exam").style.display="none"; document.getElementById("report").style.display="block";
+  const correct=results.filter(r=>r.correct).length, wrong=results.length-correct;
+  document.getElementById("score").textContent=`${correct}/50`;
+  document.getElementById("correct").textContent=correct;
+  document.getElementById("wrong").textContent=wrong;
+  document.getElementById("totalTime").textContent=formatTime(results.reduce((sum,r)=>sum+r.elapsed,0));
+  let pct=correct/50*100;
+  document.getElementById("summary").innerHTML=`<p><b>Modalidad:</b> ${timerMode==="timed"?"Con temporizador":"Sin límite de tiempo"}.</p><p><b>${pct>=80?"Desempeño alto":pct>=60?"Desempeño medio":"Necesita refuerzo"}</b> · ${pct.toFixed(1)}%. ${pct>=80?"Tienes una base sólida; ahora conviene atacar los errores finos y las preguntas de discriminación normativa.":pct>=60?"Hay una base funcional, pero necesitas consolidar conceptos y distinguir responsabilidades y procedimientos.":"El resultado muestra vacíos importantes; conviene volver a las normas y luego repetir el simulacro bajo tiempo."}</p>`;
+  renderTopics();renderErrors();renderTimes();
+}
+function formatTime(s){return `${Math.floor(s/60)}m ${String(s%60).padStart(2,"0")}s`}
+function renderTopics(){
+  const map={}; results.forEach(r=>{if(!map[r.topic])map[r.topic]={c:0,n:0};map[r.topic].n++;if(r.correct)map[r.topic].c++});
+  let out="";
+  Object.entries(map).forEach(([t,v])=>{let p=v.c/v.n*100;out+=`<div style="margin:12px 0"><div><b>${t}</b> — ${v.c}/${v.n} (${p.toFixed(0)}%)</div><div class="topicBar"><i style="width:${p}%"></i></div></div>`});
+  document.getElementById("topics").innerHTML=out;
+}
+function renderErrors(){
+  const bad=results.filter(r=>!r.correct);let out="";
+  if(!bad.length)out="<p class='goodText'>Excelente: no registraste errores.</p>";
+  bad.forEach(r=>{out+=`<div class="errorCard"><b>Pregunta ${r.n} · ${r.topic}</b><p>${r.question}</p><div class="small">Tiempo: ${r.elapsed}s${r.timeout?" · Tiempo agotado":""}</div></div>`});
+  document.getElementById("errors").innerHTML=out;
+}
+function renderTimes(){
+  let out="<table><thead><tr><th>#</th><th>Área</th><th>Tiempo empleado</th><th>Resultado</th></tr></thead><tbody>";
+  results.forEach(r=>out+=`<tr><td>${r.n}</td><td>${r.topic}</td><td>${r.elapsed}s</td><td class="${r.correct?"goodText":"badText"}">${r.correct?"Correcta":"Incorrecta"}</td></tr>`);
+  document.getElementById("times").innerHTML=out+"</tbody></table>";
+}
+document.addEventListener("click",e=>{
+  if(e.target.id==="nextBtn" && answered) goNext();
+});
+</script>
+</body>
+</html>
